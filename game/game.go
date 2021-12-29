@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mwdomino/go-cgol-lua/config"
 	"math/rand"
+	"time"
 )
 
 type Board [][]int
@@ -63,11 +64,6 @@ func (g *Game) Tick() {
 // returns 0 if cell is dead next round
 // returns 1 if cell is alive next round
 func (g *Game) calculateCellUpdate(col int, row int) int {
-	/*
-		(-1,1)(0,1)(1,1)
-		(-1,0)(0,0)(1,0)
-		(-1,-1)(0,-1)(1,-1)
-	*/
 	// inner index is row
 	// outer index is col
 	// row is y
@@ -113,6 +109,7 @@ func (g *Game) clearBoard(board *Board) {
 }
 
 func (g *Game) generateRandomBoard(iter int) {
+	rand.NewSource(time.Now().UnixNano())
 	b := g.CurrentBoard
 	for i := 0; i < iter; i++ {
 		x := rand.Intn(len(b))
