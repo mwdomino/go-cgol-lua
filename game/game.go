@@ -7,28 +7,6 @@ import (
 	"time"
 )
 
-type Board [][]int
-
-func (b Board) IsInBounds(x, y int) bool {
-	return (y > 0 &&
-		y < len(b) &&
-		x > 0 &&
-		x < len(b[y]))
-}
-
-// IsEmpty returns a boolean representing whether the game has completed
-// and all cells have died
-func (b Board) IsEmpty() bool {
-	for y := 0; y < len(b); y++ {
-		for x := 0; x < len(b[y]); x++ {
-			if b[y][x] == 1 {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // Game implements ebiten.Game interface.
 type Game struct {
 	CurrentBoard Board
@@ -39,12 +17,9 @@ type Game struct {
 
 // Init initializes a board of sizeX by sizeY dimensions
 func (g *Game) Init() {
-	x := g.Config.GridSizeX
-	y := g.Config.GridSizeY
-
-	g.CurrentBoard = initBoard(x, y)
-	g.nextBoard = initBoard(x, y)
-	g.generateRandomBoard(850)
+	g.CurrentBoard = *initBoard(g.Config.Rows, g.Config.Cols)
+	g.nextBoard = *initBoard(g.Config.Rows, g.Config.Cols)
+	g.generateRandomBoard(650)
 }
 
 // Tick iterates and pushes the game forward one cycle
@@ -52,53 +27,54 @@ func (g *Game) Init() {
 func (g *Game) Tick() {
 	c := g.CurrentBoard
 	n := g.nextBoard
-	for x := 0; x < len(c); x++ {
-		for y := 0; y < len(c[x]); y++ {
-			n[x][y] = g.calculateCellUpdate(x, y)
+	for row := 0; row < len(c); row++ {
+		for col := 0; col < len(c[row]); col++ {
+			n[row][col] = g.calculateCellUpdate(row, col)
 		}
 	}
+
 	g.CurrentBoard = n
 }
 
 // calculateCellUpdate() determines if a cell should be alive or dead on the next round
 // returns 0 if cell is dead next round
 // returns 1 if cell is alive next round
-func (g *Game) calculateCellUpdate(col int, row int) int {
-	// inner index is row
-	// outer index is col
-	// row is y
-	// col is x
+func (g *Game) calculateCellUpdate(row int, col int) int {
 	b := g.CurrentBoard
-	liveNeighbors := 0
-	currentStatus := b[row][col]
-	for x := -1; x < 1; x++ {
-		for y := -1; y < 1; y++ {
-			if b.IsInBounds(row+y, col+x) {
-				if b[row+y][col+x] == 1 {
-					liveNeighbors++
-				}
+	var liveNeighbors int
+	dead := b[row][col] == 0
+	directions := [3]int{-1, 0, 1}
+
+	for x := range directions {
+		for y := range directions {
+			if x == 0 && y == 0 {
+				continue
+			}
+			if v := b.GetValueAt(row+y, col+x); v == 1 {
+				liveNeighbors++
 			}
 		}
+
 	}
 
 	/*
 	   Any live cell with two or three live neighbours survives.
 	   Any dead cell with three live neighbours becomes a live cell.
-	   All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+	   All other live cells die in the next generation. Similarly,
+	   all other dead cells stay dead.
 	*/
-	// dead with 3 live neighbors
-	ret := 0
-	if currentStatus == 0 && liveNeighbors == 3 {
-		ret = 1
-	}
-	// live with 2 or 3 live neighbors
-	if currentStatus == 1 && liveNeighbors >= 2 && liveNeighbors <= 3 {
-		ret = 1
+	if !dead && liveNeighbors >= 2 && liveNeighbors <= 3 {
+		return 1
 	}
 
-	return ret
+	if dead && liveNeighbors == 3 {
+		return 1
+	}
+
+	return 0
 }
 
+// TODO - reallocate array here for efficiency
 func (g *Game) clearBoard(board *Board) {
 	b := *board
 	for i := 0; i < len(b); i++ {
@@ -112,21 +88,22 @@ func (g *Game) generateRandomBoard(iter int) {
 	rand.NewSource(time.Now().UnixNano())
 	b := g.CurrentBoard
 	for i := 0; i < iter; i++ {
-		x := rand.Intn(len(b))
-		y := rand.Intn(len(b))
-		b[x][y] = 1
+		col := rand.Intn(len(b))
+		row := rand.Intn(len(b))
+		b[row][col] = 1
 	}
 }
 
+// TODO - should this receive Game?
 // InitBoard initializes a new board of x by y dimensions
-func initBoard(x, y int) Board {
+func initBoard(rows, cols int) *Board {
 	var b Board
-	b = make([][]int, y)
-	for i := 0; i < x; i++ {
-		b[i] = make([]int, x)
+	b = make([][]int, rows)
+	for i := 0; i < cols; i++ {
+		b[i] = make([]int, cols)
 	}
 
-	return b
+	return &b
 }
 
 func (g Game) DumpBoard() {

@@ -1,6 +1,6 @@
 package config
 
 type Config struct {
-	GridSizeX int
-	GridSizeY int
+	Rows int
+	Cols int
 }

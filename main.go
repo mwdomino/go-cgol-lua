@@ -9,8 +9,8 @@ import (
 
 func main() {
 	config := config.Config{
-		GridSizeX: 32,
-		GridSizeY: 32,
+		Rows: 32,
+		Cols: 32,
 	}
 	game := &game.Game{Config: &config}
 	out := gui.Gui{
