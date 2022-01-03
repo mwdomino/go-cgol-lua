@@ -19,7 +19,7 @@ type Game struct {
 func (g *Game) Init() {
 	g.CurrentBoard = *initBoard(g.Config.Rows, g.Config.Cols)
 	g.nextBoard = *initBoard(g.Config.Rows, g.Config.Cols)
-	g.generateRandomBoard(650)
+	g.generateRandomBoard(12650)
 }
 
 // Tick iterates and pushes the game forward one cycle

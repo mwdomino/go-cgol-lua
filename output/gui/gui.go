@@ -27,7 +27,7 @@ func (g *Gui) Init() {
 	ebiten.SetWindowSize(g.WindowSizeX, g.WindowSizeY)
 	ebiten.SetWindowTitle(g.WindowTitle)
 	ebiten.SetRunnableOnUnfocused(true)
-	ebiten.SetMaxTPS(1)
+	ebiten.SetMaxTPS(2)
 }
 
 func (g *Gui) Run() {

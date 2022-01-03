@@ -9,13 +9,13 @@ import (
 
 func main() {
 	config := config.Config{
-		Rows: 32,
-		Cols: 32,
+		Rows: 100,
+		Cols: 100,
 	}
 	game := &game.Game{Config: &config}
 	out := gui.Gui{
-		WindowSizeX:     320,
-		WindowSizeY:     320,
+		WindowSizeX:     config.Cols * 10,
+		WindowSizeY:     config.Rows * 10,
 		GridSpacing:     10,
 		GridColor:       color.Black,
 		BackgroundColor: color.White,
